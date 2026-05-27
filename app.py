@@ -145,6 +145,27 @@ run_btn = widgets.Button(description="🎧 Tạo audio + phụ đề")
 reload_btn = widgets.Button(description="🔄 Tải lại tất cả")
 output = widgets.Output()
 
+# ========================== #
+# 🏷️ Label hiển thị tên file
+# ========================== #
+api_file_label  = widgets.HTML(value='<span style="color:#888; font-style:italic;">Chưa chọn file</span>')
+voice_file_label = widgets.HTML(value='<span style="color:#888; font-style:italic;">Chưa chọn file</span>')
+text_file_label  = widgets.HTML(value='<span style="color:#888; font-style:italic;">Chưa chọn file</span>')
+
+def make_filename_observer(label_widget):
+    def _observer(change):
+        new_val = change['new']
+        if new_val:
+            name = list(new_val.keys())[0]
+            label_widget.value = f'<span style="color:#2e7d32; font-weight:bold;">✅ {name}</span>'
+        else:
+            label_widget.value = '<span style="color:#888; font-style:italic;">Chưa chọn file</span>'
+    return _observer
+
+api_file.observe(make_filename_observer(api_file_label),   names='value')
+voice_file.observe(make_filename_observer(voice_file_label), names='value')
+text_file.observe(make_filename_observer(text_file_label),  names='value')
+
 # Button to download all files after processing
 download_btn = widgets.Button(description="⬇️ Tải về tất cả kết quả")
 
@@ -169,6 +190,9 @@ def on_reload_click(b):
     api_file.value = {}
     voice_file.value = {}
     text_file.value = {}
+    api_file_label.value  = '<span style="color:#888; font-style:italic;">Chưa chọn file</span>'
+    voice_file_label.value = '<span style="color:#888; font-style:italic;">Chưa chọn file</span>'
+    text_file_label.value  = '<span style="color:#888; font-style:italic;">Chưa chọn file</span>'
     output.clear_output()
     download_btn.layout.display = 'none'
     print("Giao diện đã được tải lại. Vui lòng tải lại các tệp tin.")
@@ -203,7 +227,12 @@ def on_download_all_click(b):
 # Display the UI
 display(widgets.VBox([
     widgets.HTML("<h3>🎤 <b>ElevenLabs - Tạo giọng nói + phụ đề từ nhiều API key</b></h3><p>Upload 3 file: <code>api_keys.txt</code>, <code>voice_id.txt</code>, <code>texts.txt</code></p>"),
-    api_file, voice_file, text_file,
+    widgets.HTML("<b>📄 File API Keys:</b>"),
+    widgets.HBox([api_file, api_file_label]),
+    widgets.HTML("<b>🎙️ File Voice ID:</b>"),
+    widgets.HBox([voice_file, voice_file_label]),
+    widgets.HTML("<b>📝 File Văn bản:</b>"),
+    widgets.HBox([text_file, text_file_label]),
     run_btn, reload_btn, output,
     download_btn  # Hidden initially, shown after processing
 ]))
